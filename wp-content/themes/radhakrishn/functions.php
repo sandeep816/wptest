@@ -70,57 +70,10 @@ function user_login_ajax()
     $redirect_to = home_url(); // Change this to the URL you want to redirect to after login
 
     wp_send_json(array('status' => true, 'message' => 'Login successful', 'redirect_to' => $redirect_to));
-
-
-    // check_ajax_referer( 'ajax-login-nonce', 'security' );
-    // if( ! empty($_POST['ss_nonce'])  && wp_verify_nonce($_POST['ss_nonce'], 'ss_nonce') ) {
-
-    //     $username = $_POST['username'];
-    //     $password = $_POST['password'];
-    //     $remember = $_POST['remember'];
-
-    //     $credentials = array(
-    //         'user_login' => $username,
-    //         'user_password' => $password,
-    //         'remember' => $remember == "on" ? true : false
-    //     );
-
-    //     $user = wp_signon($credentials, false);
-
-    //      // Set the redirect URL
-    //     $redirect_to = home_url(); // Change this to the URL you want to redirect to after login
-
-
-    //     if ( is_wp_error( $user ) ) {
-
-    //         $error_code = $user->get_error_code();
-
-    //         if( $error_code == 'incorrect_password' ) {
-
-    //             echo json_encode( array(
-    //                 'success' => false,
-    //                 'message' => sprintf( wp_kses(__('The password you entered for the username <strong>%s</strong> is incorrect.', ''), $allowed_html_array), $username )
-    //             ) );
-
-    //         } else {
-
-    //             echo json_encode( array(
-    //                 'success' => false,
-    //                 'message' => $user->get_error_message(),
-    //                 'redirect_to' => $redirect_to
-    //             ) );
-
-    //         }
-
-    //         wp_die();
-    //     } else {
-    //     }
-
-    // }
 }
 
 
-/*Registor*/
+// Register User
 
 add_action('wp_ajax_nopriv_user_register', 'user_register_ajax');
 add_action('wp_ajax_user_register', 'user_register_ajax');
@@ -246,7 +199,6 @@ add_action('template_redirect', 'handle_email_verification');
 
 
 // Add the "Verified" column to the users table
-// Add the "Verified" column to the users table
 function add_verified_column($columns) {
     $columns['verified'] = __('Verified', 'mydomain');
     return $columns;
@@ -297,3 +249,104 @@ function display_verification_notice() {
     }
 }
 add_action('admin_notices', 'display_verification_notice');
+
+
+// Add custom endpoint for email verification failed
+add_action('wp_ajax_nopriv_resend_verification_email', 'resend_verification_email_ajax');
+add_action('wp_ajax_resend_verification_email', 'resend_verification_email_ajax');
+
+function resend_verification_email_ajax() {
+    $user_id = intval($_POST['user_id']);
+
+    if (!$user_id) {
+        wp_send_json(array('status' => false, 'message' => 'Invalid user ID.'));
+    }
+
+    $user = get_userdata($user_id);
+
+    if (!$user) {
+        wp_send_json(array('status' => false, 'message' => 'User not found.'));
+    }
+
+    // Generate a new verification code
+    $verification_code = wp_generate_password(20, false);
+    update_user_meta($user_id, 'email_verification_code', $verification_code);
+
+    $verification_link = add_query_arg(array(
+        'user_id' => $user_id,
+        'verification_code' => $verification_code
+    ), site_url('/verify-email'));
+
+    $subject = 'Verify Your Email Address';
+    $message = 'Please click the following link to verify your email address: ' . $verification_link;
+    $headers = array('Content-Type: text/html; charset=UTF-8');
+    $mail_sent = wp_mail($user->user_email, $subject, $message, $headers);
+
+    if (!$mail_sent) {
+        wp_send_json(array('status' => false, 'message' => 'Failed to send verification email.'));
+    }
+
+    wp_send_json(array('status' => true, 'message' => 'Verification email sent successfully.'));
+}
+
+
+// Add custom endpoint for password reset
+add_action('wp_ajax_nopriv_forgot_password', 'handle_forgot_password');
+add_action('wp_ajax_forgot_password', 'handle_forgot_password');
+
+function handle_forgot_password() {
+    $user_email = sanitize_email($_POST['user_email']);
+
+    if (!is_email($user_email)) {
+        wp_send_json(array('status' => false, 'message' => 'Invalid email address.'));
+    }
+
+    $user = get_user_by('email', $user_email);
+
+    if (!$user) {
+        wp_send_json(array('status' => false, 'message' => 'No user found with this email address.'));
+    }
+
+    // Generate a password reset key
+    $reset_key = get_password_reset_key($user);
+
+    // Create the password reset link
+    $reset_link = add_query_arg(array(
+        'action' => 'reset_password',
+        'key' => $reset_key,
+        'login' => rawurlencode($user->user_login)
+    ), site_url('/reset-password'));
+
+    // Send the password reset email
+    $subject = 'Password Reset Request';
+    $message = 'Click the following link to reset your password: ' . $reset_link;
+    $headers = array('Content-Type: text/html; charset=UTF-8');
+    $mail_sent = wp_mail($user_email, $subject, $message, $headers);
+
+    if (!$mail_sent) {
+        wp_send_json(array('status' => false, 'message' => 'Failed to send password reset email.'));
+    }
+
+    wp_send_json(array('status' => true, 'message' => 'Password reset email sent successfully.'));
+}
+
+
+// Add custom endpoint for password reset
+add_action('wp_ajax_nopriv_reset_password', 'handle_reset_password');
+add_action('wp_ajax_reset_password', 'handle_reset_password');
+
+function handle_reset_password() {
+    $reset_key = sanitize_text_field($_POST['reset_key']);
+    $user_login = sanitize_text_field($_POST['user_login']);
+    $new_password = sanitize_text_field($_POST['new_password']);
+
+    $user = check_password_reset_key($reset_key, $user_login);
+
+    if (is_wp_error($user)) {
+        wp_send_json(array('status' => false, 'message' => 'Invalid password reset key.'));
+    }
+
+    reset_password($user, $new_password);
+
+    wp_send_json(array('status' => true, 'message' => 'Password reset successfully.'));
+}

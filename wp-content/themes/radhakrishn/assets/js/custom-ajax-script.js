@@ -1,11 +1,7 @@
-var ids = {};
-var filter_clear = [];
-var page = 1;
-
 (function($) {
     "use strict";
     $(document).ready(function() {
-
+        // Login Form
         $('#loginForm').on('submit', function(e) {
             e.preventDefault();
     
@@ -27,47 +23,10 @@ var page = 1;
             });
         });
 
-        // $('#loginForm').on('submit', function(e) {
-        //     e.preventDefault();
-
-        //         var username = $('#username').val();
-        //         var password = $('#password').val();
-        //         var security = $('#security').val();
-
-        //         jQuery.ajax({
-        //             type: 'POST',
-        //             dataType: 'json',
-        //             url: ajax_object.ajax_url,
-        //             data: $("#loginForm").serialize(),
-        //             success: function(response) {
-        //                 // Handle successful login response (e.g., redirect to desired page)
-        //                 console.log(response);
-        //                     if( response.success == true ){
-        //                         $(".form-message").html("<p class='alert alert-success'>" + response.message + "</p>");
-        //                         window.location.href = response.data.redirect_to;
-        //                         return;
-        //                     } else{
-        //                         $(".form-message").html("<p class='alert alert-danger'>" + response.message + "</p>");
-        //                     }
-        //                     return false;
-        //               },
-        //               error: function(jqXHR, textStatus, errorThrown) {
-        //                 console.error(textStatus, errorThrown);
-        //               }
-        //         });
- 
-        //     });
-
-
-       
-
-
-        $('#registerform').on('submit', function(e) {
+    // Register Form        
+     $('#registerform').on('submit', function(e) {
             e.preventDefault();
        
-            //alert("hello");
-           
-
             var data = {
                 action: 'user_register',
                 ajax_data: $(this).serialize()
@@ -85,10 +44,62 @@ var page = 1;
              
        });
 
+    // Resend Verification Email
+    $(document).on('click', '#resendVerification', function(e) {
+        e.preventDefault();
 
-        
+        var userId = $(this).data('user-id'); // Assuming you have the user ID stored in a data attribute
 
-        
+        var data = {
+            action: 'resend_verification_email',
+            user_id: userId
+        };
+
+        $.post(ajax_object.ajax_url, data, function(response) {
+            if (response.status) {
+                $('#registerMessage').html('<p>' + response.message + '</p>');
+            } else {
+                $('#registerMessage').html('<p>' + response.message + '</p>');
+            }
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            console.error(textStatus, errorThrown);
+        });
+    });
+
+    // Forgot Password Form
+
+    $('#forgotPasswordForm').on('submit', function(e) {
+        e.preventDefault();
+
+        var data = {
+            action: 'forgot_password',
+            user_email: $('input[name="user_email"]').val()
+        };
+
+        $.post(ajax_object.ajax_url, data, function(response) {
+            $('#forgotPasswordMessage').html('<p>' + response.message + '</p>').show();
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            console.error(textStatus, errorThrown);
+        });
+    });
+
+    // Reset Password Form
+    $('#resetPasswordForm').on('submit', function(e) {
+        e.preventDefault();
+
+        var data = {
+            action: 'reset_password',
+            reset_key: $('input[name="reset_key"]').val(),
+            user_login: $('input[name="user_login"]').val(),
+            new_password: $('input[name="new_password"]').val()
+        };
+
+        $.post(ajax_object.ajax_url, data, function(response) {
+            $('#resetPasswordMessage').html('<p>' + response.message + '</p>').show();
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            console.error(textStatus, errorThrown);
+        });
+    });
 
 
     });

@@ -97,6 +97,9 @@
 .flex {
     display: flex
 }
+.table {
+    display: table
+}
 .grid {
     display: grid
 }
@@ -113,14 +116,14 @@
 .w-full {
     width: 100%
 }
+.max-w-\[1000px\] {
+    max-width: 1000px
+}
 .max-w-md {
     max-width: 28rem
 }
 .max-w-screen-xl {
     max-width: 1280px
-}
-.max-w-\[1000px\] {
-    max-width: 1000px
 }
 .shrink-0 {
     flex-shrink: 0
@@ -189,9 +192,17 @@
     --tw-border-opacity: 1;
     border-color: rgb(209 213 219 / var(--tw-border-opacity))
 }
+.border-blue-500 {
+    --tw-border-opacity: 1;
+    border-color: rgb(59 130 246 / var(--tw-border-opacity))
+}
 .bg-amber-600 {
     --tw-bg-opacity: 1;
     background-color: rgb(217 119 6 / var(--tw-bg-opacity))
+}
+.bg-blue-400 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(96 165 250 / var(--tw-bg-opacity))
 }
 .bg-blue-600 {
     --tw-bg-opacity: 1;
@@ -220,10 +231,6 @@
 .bg-white {
     --tw-bg-opacity: 1;
     background-color: rgb(255 255 255 / var(--tw-bg-opacity))
-}
-.bg-blue-400 {
-    --tw-bg-opacity: 1;
-    background-color: rgb(96 165 250 / var(--tw-bg-opacity))
 }
 .p-3 {
     padding: 0.75rem
