@@ -40,6 +40,8 @@ wp-config.php
 /package-lock.json
 /node_modules
 
+.ddev
+
 # All plugins
 #
 # Note: If you wish to whitelist plugins,
