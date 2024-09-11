@@ -210,18 +210,54 @@ add_action('template_redirect', 'handle_email_verification');
 
 
 // Add the "Verified" column to the users table
+// Add the "Verified" column to the users table
 function add_verified_column($columns) {
     $columns['verified'] = __('Verified', 'mydomain');
     return $columns;
 }
 add_filter('manage_users_columns', 'add_verified_column');
 
-// Populate the "Verified" column with data
+// Populate the "Verified" column with data and a manual verification link
 function show_verified_column_content($value, $column_name, $user_id) {
     if ($column_name == 'verified') {
         $is_verified = get_user_meta($user_id, 'is_email_verified', true);
-        return $is_verified ? __('Verified', 'mydomain') : __('Not Verified', 'mydomain');
+        if ($is_verified) {
+            return __('Verified', 'mydomain');
+        } else {
+            $verify_url = wp_nonce_url(admin_url('users.php?action=verify_user&user_id=' . $user_id), 'verify_user_' . $user_id);
+            return __('Not Verified', 'mydomain') . ' | <a href="' . esc_url($verify_url) . '">' . __('Verify Now', 'mydomain') . '</a>';
+        }
     }
     return $value;
 }
 add_action('manage_users_custom_column', 'show_verified_column_content', 10, 3);
+
+// Handle manual verification
+function handle_manual_verification() {
+    if (isset($_GET['action']) && $_GET['action'] == 'verify_user' && isset($_GET['user_id']) && isset($_GET['_wpnonce'])) {
+        $user_id = intval($_GET['user_id']);
+        $nonce = $_GET['_wpnonce'];
+
+        // Debugging: Log the verification process
+        error_log('Manual verification process started for user_id: ' . $user_id);
+
+        if (!wp_verify_nonce($nonce, 'verify_user_' . $user_id)) {
+            wp_die(__('Nonce verification failed', 'mydomain'));
+        }
+
+        update_user_meta($user_id, 'is_email_verified', true);
+        delete_user_meta($user_id, 'email_verification_code');
+
+        wp_redirect(admin_url('users.php?verified=1'));
+        exit;
+    }
+}
+add_action('admin_init', 'handle_manual_verification');
+
+// Display admin notice after manual verification
+function display_verification_notice() {
+    if (isset($_GET['verified']) && $_GET['verified'] == 1) {
+        echo '<div class="notice notice-success is-dismissible"><p>' . __('User has been verified successfully.', 'mydomain') . '</p></div>';
+    }
+}
+add_action('admin_notices', 'display_verification_notice');
