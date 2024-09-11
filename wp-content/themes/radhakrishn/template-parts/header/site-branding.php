@@ -1,0 +1,1 @@
+<div class="md:flex md:items-center md:gap-12"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></div>

@@ -1,0 +1,21 @@
+/*
+Theme Name: RadhaKrishn
+Theme URI: https://github.com/sandeep816/radhakrishn
+Author: Sandeep Sharma
+Author URI: https://sandeepsharma.dev
+Description: XePress is a simple boilerplate WordPress theme with Tailwind CSS.
+Version: 4.0
+License URI: https://github.com/sandeep816/radhakrishn/LICENSE
+Text Domain: radhakrishn
+*/
+
+
+
+.auth-form-wrap {
+    background: #fff;
+    padding: 0;
+    text-align: left;
+    max-width: 930px;
+    margin: 40px auto;
+    position: relative;
+}
