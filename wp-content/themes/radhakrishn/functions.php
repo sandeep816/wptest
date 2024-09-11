@@ -350,3 +350,61 @@ function handle_reset_password() {
 
     wp_send_json(array('status' => true, 'message' => 'Password reset successfully.'));
 }
+
+
+//  Front-End Post Submission 
+add_action('wp_ajax_nopriv_submit_post', 'handle_submit_post');
+add_action('wp_ajax_submit_post', 'handle_submit_post');
+
+function handle_submit_post() {
+    if (!is_user_logged_in()) {
+        wp_send_json(array('status' => false, 'message' => 'You must be logged in to submit a post.'));
+    }
+
+    // Check nonce for security
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'submit_post_nonce')) {
+        wp_send_json(array('status' => false, 'message' => 'Nonce verification failed.'));
+    }
+
+    $post_title = sanitize_text_field($_POST['post_title']);
+    $post_content = wp_kses_post($_POST['post_content']);
+    $post_categories = array_map('intval', $_POST['post_categories']);
+    $post_tags = sanitize_text_field($_POST['post_tags']);
+
+    $post_id = wp_insert_post(array(
+        'post_title' => $post_title,
+        'post_content' => $post_content,
+        'post_status' => 'pending', // Set to 'pending' for review before publishing
+        'post_author' => get_current_user_id(),
+        'post_category' => $post_categories,
+        'tags_input' => explode(',', $post_tags),
+    ));
+
+    if (is_wp_error($post_id)) {
+        wp_send_json(array('status' => false, 'message' => 'Failed to submit post.'));
+    }
+
+    // Handle the featured image upload
+    if (!empty($_FILES['post_featured_image']['name'])) {
+        $file = $_FILES['post_featured_image'];
+        $upload = wp_handle_upload($file, array('test_form' => false));
+
+        if ($upload && !isset($upload['error'])) {
+            $attachment_id = wp_insert_attachment(array(
+                'post_mime_type' => $upload['type'],
+                'post_title' => sanitize_file_name($file['name']),
+                'post_content' => '',
+                'post_status' => 'inherit'
+            ), $upload['file'], $post_id);
+
+            require_once(ABSPATH . 'wp-admin/includes/image.php');
+            $attach_data = wp_generate_attachment_metadata($attachment_id, $upload['file']);
+            wp_update_attachment_metadata($attachment_id, $attach_data);
+            set_post_thumbnail($post_id, $attachment_id);
+        } else {
+            wp_send_json(array('status' => false, 'message' => 'Failed to upload featured image.'));
+        }
+    }
+
+    wp_send_json(array('status' => true, 'message' => 'Post submitted successfully.'));
+}

@@ -1,12 +1,13 @@
-<div id="popup-forgot-form" class="mfp-hide zoom-anim-dialog auth-form-wrap">
-<div class="auth-wrap">
-    <h2 class="truncate text-xl font-semibold mb-5">Log In Your Account</h2>
-    <form id="custom-forgot-password-form" class="mx-auto mb-0 mt-8 max-w-md space-y-4" action="" method="post">
+<div id="popup-forgot-form" class="forgot-password-form mfp-hide zoom-anim-dialog auth-form-wrap">
+    <div class="auth-wrap">
+        <h2>Forgot Password</h2>
+        <p>Please enter your username or email address. You will receive a link to create a new password via email.</p>
+        <form id="forgotPasswordForm" class="mx-auto mb-0 mt-8 max-w-md space-y-4" method="post">
         <div class="form-group mt-3">
-            <div class="relative"><input type="email" class="w-full rounded-lg border-blue-500 p-4 pe-12 text-sm shadow-sm required" name="email" id="forgot-email" placeholder="Email"></div>
-        </div>
-        <input type="submit" value="Reset Password" class="btn inline-block rounded-lg bg-green-700 px-5 py-3 text-sm font-medium text-white">
-        <span class="response-message"></span>
-    </form>
-</div>
+            <input type="email" name="user_email" placeholder="Enter your email" class="w-full rounded-lg border-blue-500 p-4 pe-12 text-sm shadow-sm required" required>
+            </div>
+            <button type="submit" class="btn inline-block rounded-lg bg-green-700 px-5 py-3 text-sm font-medium text-white">Submit</button>
+        </form>
+        <div id="forgotPasswordMessage" style="display:none;"></div>
+    </div>
 </div>

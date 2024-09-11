@@ -102,5 +102,36 @@
     });
 
 
+    // Post Submission Form
+    $('#post-submission-form').on('submit', function(e) {
+        e.preventDefault();
+
+        var formData = new FormData(this);
+        formData.append('action', 'submit_post');
+        formData.append('nonce', $('#submit_post_nonce').val());
+        formData.append('post_content', tinyMCE.get('post-content-editor').getContent());
+
+        $.ajax({
+            url: ajax_object.ajax_url,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.status) {
+                    $('#post-submission-message').html('<p>' + response.message + '</p>').show();
+                    $('#post-submission-form')[0].reset();
+                    tinyMCE.get('post-content-editor').setContent('');
+                } else {
+                    $('#post-submission-message').html('<p>' + response.message + '</p>').show();
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error(textStatus, errorThrown);
+            }
+        });
+    });
+
+
     });
     })(this.jQuery);

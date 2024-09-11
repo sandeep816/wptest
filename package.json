@@ -12,6 +12,7 @@
   "author": "Sandeep Sharma",
   "license": "ISC",
   "devDependencies": {
+    "@tailwindcss/forms": "^0.5.9",
     "autoprefixer": "^10.4.19",
     "browser-sync": "^3.0.2",
     "browser-sync-webpack-plugin": "^2.3.0",
