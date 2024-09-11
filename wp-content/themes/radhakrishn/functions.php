@@ -32,55 +32,91 @@ if (!current_user_can('administrator') && !is_admin()) {
 /**
  * login page ajax call
  */
-add_action('wp_ajax_login', 'login_ajax');
-add_action('wp_ajax_nopriv_login', 'login_ajax');
+add_action('wp_ajax_user_login', 'user_login_ajax');
+add_action('wp_ajax_nopriv_user_login', 'user_login_ajax');
 
 /**
  * login page ajax call
  */
-function login_ajax()
+function user_login_ajax()
 {
-    check_ajax_referer( 'ajax-login-nonce', 'security' );
-    if( ! empty($_POST['ss_nonce'])  && wp_verify_nonce($_POST['ss_nonce'], 'ss_nonce') ) {
 
-        $username = $_POST['username'];
-        $password = $_POST['password'];
-        $remember = $_POST['remember'];
+    $params = array();
+    parse_str($_POST['ajax_data'], $params);
 
-        $credentials = array(
-            'user_login' => $username,
-            'user_password' => $password,
-            'remember' => $remember == "on" ? true : false
-        );
+    $username = sanitize_text_field($params['username']);
+    $password = sanitize_text_field($params['password']);
+    $remember = isset($params['remember']) ? true : false;
 
-        $user = wp_signon($credentials, false);
-
-
-        if ( is_wp_error( $user ) ) {
-
-            $error_code = $user->get_error_code();
-
-            if( $error_code == 'incorrect_password' ) {
-
-                echo json_encode( array(
-                    'success' => false,
-                    'message' => sprintf( wp_kses(__('The password you entered for the username <strong>%s</strong> is incorrect.', ''), $allowed_html_array), $username )
-                ) );
-
-            } else {
-
-                echo json_encode( array(
-                    'success' => false,
-                    'message' => $user->get_error_message()
-                ) );
-
-            }
-
-            wp_die();
-        } else {
-        }
-
+    if (empty($username)) {
+        wp_send_json(array('status' => false, 'message' => 'Please enter your username'));
     }
+
+    if (empty($password)) {
+        wp_send_json(array('status' => false, 'message' => 'Please enter your password'));
+    }
+
+    $user = wp_signon(array(
+        'user_login'    => $username,
+        'user_password' => $password,
+        'remember'      => $remember,
+    ));
+
+    if (is_wp_error($user)) {
+        wp_send_json(array('status' => false, 'message' => $user->get_error_message()));
+    }
+
+    // Set the redirect URL
+    $redirect_to = home_url(); // Change this to the URL you want to redirect to after login
+
+    wp_send_json(array('status' => true, 'message' => 'Login successful', 'redirect_to' => $redirect_to));
+
+
+    // check_ajax_referer( 'ajax-login-nonce', 'security' );
+    // if( ! empty($_POST['ss_nonce'])  && wp_verify_nonce($_POST['ss_nonce'], 'ss_nonce') ) {
+
+    //     $username = $_POST['username'];
+    //     $password = $_POST['password'];
+    //     $remember = $_POST['remember'];
+
+    //     $credentials = array(
+    //         'user_login' => $username,
+    //         'user_password' => $password,
+    //         'remember' => $remember == "on" ? true : false
+    //     );
+
+    //     $user = wp_signon($credentials, false);
+
+    //      // Set the redirect URL
+    //     $redirect_to = home_url(); // Change this to the URL you want to redirect to after login
+
+
+    //     if ( is_wp_error( $user ) ) {
+
+    //         $error_code = $user->get_error_code();
+
+    //         if( $error_code == 'incorrect_password' ) {
+
+    //             echo json_encode( array(
+    //                 'success' => false,
+    //                 'message' => sprintf( wp_kses(__('The password you entered for the username <strong>%s</strong> is incorrect.', ''), $allowed_html_array), $username )
+    //             ) );
+
+    //         } else {
+
+    //             echo json_encode( array(
+    //                 'success' => false,
+    //                 'message' => $user->get_error_message(),
+    //                 'redirect_to' => $redirect_to
+    //             ) );
+
+    //         }
+
+    //         wp_die();
+    //     } else {
+    //     }
+
+    // }
 }
 
 

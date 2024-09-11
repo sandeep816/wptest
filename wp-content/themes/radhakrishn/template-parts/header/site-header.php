@@ -6,7 +6,7 @@
             <?php if ( is_user_logged_in() ) { ?>
           <a
             class="rounded-md bg-teal-600 px-5 py-2.5 text-sm font-medium text-white shadow"
-            href="<?php echo wp_logout_url(); ?>"
+            href="<?php echo wp_logout_url(home_url()); ?>"
           >
           Logout
           </a>

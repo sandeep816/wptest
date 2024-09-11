@@ -8,41 +8,55 @@ var page = 1;
 
         $('#loginForm').on('submit', function(e) {
             e.preventDefault();
-
-                var username = $('#username').val();
-                var password = $('#password').val();
-                var security = $('#security').val();
-
-                var data = {
-                    'action': 'ajaxlogin',
-                    'username': username,
-                    'password': password,
-                    'security': security
-                };
-
-                jQuery.ajax({
-                    type: 'POST',
-                    dataType: 'json',
-                    url: ajax_object.ajax_url,
-                    data: $("#loginForm").serialize(),
-                    success: function(response) {
-                        // Handle successful login response (e.g., redirect to desired page)
-                        console.log(response);
-                            if( response.success == true ){
-                                $(".form-message").html("<p class='alert alert-success'>" + response.message + "</p>");
-                                window.location.href = response.data.redirect_to;
-                                return;
-                            } else{
-                                $(".form-message").html("<p class='alert alert-danger'>" + response.message + "</p>");
-                            }
-                            return false;
-                      },
-                      error: function(jqXHR, textStatus, errorThrown) {
-                        console.error(textStatus, errorThrown);
-                      }
-                });
- 
+    
+            var data = {
+                action: 'user_login',
+                ajax_data: $(this).serialize()
+            };
+    
+            $.post(ajax_object.ajax_url, data, function(response) {
+                if (response.status) {
+                    $('#loginForm').hide();
+                    $('#loginMessage').html('<p>' + response.message + '</p>').show();
+                    if (response.redirect_to) {
+                        window.location.href = response.redirect_to;
+                    }
+                } else {
+                    $('#loginMessage').html('<p>' + response.message + '</p>').show();
+                }
             });
+        });
+
+        // $('#loginForm').on('submit', function(e) {
+        //     e.preventDefault();
+
+        //         var username = $('#username').val();
+        //         var password = $('#password').val();
+        //         var security = $('#security').val();
+
+        //         jQuery.ajax({
+        //             type: 'POST',
+        //             dataType: 'json',
+        //             url: ajax_object.ajax_url,
+        //             data: $("#loginForm").serialize(),
+        //             success: function(response) {
+        //                 // Handle successful login response (e.g., redirect to desired page)
+        //                 console.log(response);
+        //                     if( response.success == true ){
+        //                         $(".form-message").html("<p class='alert alert-success'>" + response.message + "</p>");
+        //                         window.location.href = response.data.redirect_to;
+        //                         return;
+        //                     } else{
+        //                         $(".form-message").html("<p class='alert alert-danger'>" + response.message + "</p>");
+        //                     }
+        //                     return false;
+        //               },
+        //               error: function(jqXHR, textStatus, errorThrown) {
+        //                 console.error(textStatus, errorThrown);
+        //               }
+        //         });
+ 
+        //     });
 
 
        

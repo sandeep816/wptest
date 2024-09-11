@@ -6,7 +6,7 @@
 <div id="popup-login-form" class="mfp-hide zoom-anim-dialog auth-form-wrap">
 <div class="auth-wrap">
         <h2 class="truncate text-xl font-semibold mb-5">Log In Your Account</h2>
-        <div class="form-message"></div>
+        <div class="form-message" id="loginMessage"></div>
         <form action="#" id="loginForm" class="mx-auto mb-0 mt-8 max-w-md space-y-4" method="post" accept-charset="utf-8">
 
  
@@ -41,7 +41,7 @@
             </div> <!-- END .form-group .row -->
 
             <div class="form-group">
-                <input type="hidden" name="action" value="login">
+                <input type="hidden" name="action" value="user_login">
                 <input type="hidden" name="ss_nonce"
                        value="<?php echo esc_attr(wp_create_nonce('ss_nonce')) ?>">
                 <input class="btn inline-block rounded-lg bg-green-700 px-5 py-3 text-sm font-medium text-white" name="login_submit" type="submit" value="LOGIN">
